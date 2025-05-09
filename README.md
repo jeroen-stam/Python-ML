@@ -2,7 +2,7 @@
 
 A kaggle project to get to know the workings of machine learning with the use of python and google colab
 
-## contents:
+## Contents:
 - Exploratory Data Analysis (EDA)
 - Data cleaning
 - Feature engineering
