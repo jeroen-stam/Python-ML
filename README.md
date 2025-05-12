@@ -1,3 +1,18 @@
+# Energy Demand Forecast NL
+
+Forecasting electricity demand in the Netherlands using Python, SQL and ML
+
+
+
+
+
+
+
+
+
+
+
+
 # Titanic Survival Prediction 
 
 A kaggle project to get to know the workings of machine learning with the use of python and google colab
