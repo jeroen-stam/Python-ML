@@ -2,7 +2,8 @@
 
 Forecasting electricity demand in the Netherlands using Python, SQL and ML
 Using data from ENTSO-E regarding hourly electricity demand from 2020 until 2024, I create a forecasting model for future electricity demand. *
-Files containing Queries and Python Scripts for SQL and Google Colab respectively can be found in the files above
+
+Files containing Queries and Python Scripts for SQL and Google Colab respectively can be found in the files above.
 
 ## Contents:
 - Data cleaning and merging using SQL
