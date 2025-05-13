@@ -1,0 +1,55 @@
+--checking count per table
+
+SELECT COUNT(*) FROM monthly_hourly_load_values_2020;
+SELECT COUNT(*) FROM monthly_hourly_load_values_2023;
+SELECT COUNT(*) FROM monthly_hourly_load_values_2024;
+
+--cleaning unneeded columns from data, creating cleaned new tables 
+CREATE TABLE cleaned_2020 AS
+SELECT DateUTC, Value
+FROM monthly_hourly_load_values_2020
+WHERE CountryCode = 'NL' AND Value IS NOT NULL;
+
+CREATE TABLE cleaned_2023 AS
+SELECT DateUTC, Value
+FROM monthly_hourly_load_values_2023
+WHERE CountryCode = 'NL' AND Value IS NOT NULL;
+
+CREATE TABLE cleaned_2024 AS
+SELECT DateUTC, Value
+FROM monthly_hourly_load_values_2024
+WHERE CountryCode = 'NL' AND Value IS NOT NULL;
+
+
+--creating new table combining the cleaned tables per year
+CREATE TABLE electricity_nl_clean AS
+SELECT * FROM cleaned_2020
+UNION ALL
+SELECT * FROM cleaned_2023
+UNION ALL
+SELECT * FROM cleaned_2024;
+
+--converting decimal pointer to dot 
+CREATE TABLE electricity_nl_final AS
+SELECT
+  DateUTC,
+  ROUND(CAST(REPLACE(Value, ',', '.') AS REAL), 2) AS load_mw
+FROM 
+  electricity_nl_clean
+WHERE 
+  Value IS NOT NULL;
+
+--Checking the average value per year
+SELECT 
+    SUBSTR(DateUTC, 
+           LENGTH(SUBSTR(DateUTC, 1, INSTR(DateUTC, ' ') - 1)) - 3, 
+           4) AS year,
+    AVG(load_mw) AS avg_load_mw
+FROM 
+    electricity_nl_final
+WHERE 
+    load_mw IS NOT NULL
+GROUP BY 
+    year
+ORDER BY 
+    year;
