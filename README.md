@@ -12,7 +12,7 @@ Files containing Queries and Python Scripts for SQL and Google Colab respectivel
 - Data visualisations in Python
 - Building a forecasting model using Facebook Prophet in Python
 - Evaluating model performance
-- visualising model performance
+- Visualising model performance
 
 
 
