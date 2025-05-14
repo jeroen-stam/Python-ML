@@ -1,29 +1,127 @@
 --checking count per table
 
 SELECT COUNT(*) FROM monthly_hourly_load_values_2020;
+SELECT COUNT(*) FROM monthly_hourly_load_values_2021;
+SELECT COUNT(*) FROM monthly_hourly_load_values_2022;
 SELECT COUNT(*) FROM monthly_hourly_load_values_2023;
 SELECT COUNT(*) FROM monthly_hourly_load_values_2024;
 
 --cleaning unneeded columns from data, creating cleaned new tables 
-CREATE TABLE cleaned_2020 AS
-SELECT DateUTC, Value
-FROM monthly_hourly_load_values_2020
-WHERE CountryCode = 'NL' AND Value IS NOT NULL;
+            CREATE TABLE cleaned_2020 AS
+            SELECT DateUTC, Value
+            FROM monthly_hourly_load_values_2020
+            WHERE CountryCode = 'NL' AND Value IS NOT NULL;
+            
+  --cleaning the 21 and 22 data is more complex, since the formats for value were very screwed up
 
-CREATE TABLE cleaned_2023 AS
-SELECT DateUTC, Value
-FROM monthly_hourly_load_values_2023
-WHERE CountryCode = 'NL' AND Value IS NOT NULL;
+            Create table rawNL21 as 
+            SELECT DATEUTC, Value
+            FROM monthly_hourly_load_values_2021
+            WHERE CountryCode = 'NL' AND Value IS NOT NULL;
+           
 
-CREATE TABLE cleaned_2024 AS
-SELECT DateUTC, Value
-FROM monthly_hourly_load_values_2024
-WHERE CountryCode = 'NL' AND Value IS NOT NULL;
+            Create Table cleaned_2021 as 
+            SELECT
+              DateUTC,
+              Value,
+              CASE
+                -- Waarden met exact 1 punt → correcte MW-waarden met decimalen
+                WHEN LENGTH(Value) - LENGTH(REPLACE(Value, '.', '')) = 1 THEN
+                  CAST(Value AS REAL)
+            
+                -- Waarden zonder punt, maar volledig numeriek → hele MW-waarden
+                WHEN LENGTH(Value) - LENGTH(REPLACE(Value, '.', '')) = 0
+                     AND Value GLOB '[0-9]*' THEN
+                  CAST(Value AS REAL)
+            
+                -- Foutief genoteerde waarden tussen 90 en 200 miljoen (honderden watt) → delen door 1000
+                WHEN CAST(REPLACE(Value, '.', '') AS INTEGER) BETWEEN 90000000 AND 200000000 THEN
+                  CAST(REPLACE(Value, '.', '') AS REAL) / 10000.0
+            
+                -- Foutief genoteerde waarden tussen 9 en 20 miljoen (duizenden watt) → delen door 100
+                WHEN CAST(REPLACE(Value, '.', '') AS INTEGER) BETWEEN 9000000 AND 20000000 THEN
+                  CAST(REPLACE(Value, '.', '') AS REAL) / 1000.0
+            
+                  
+                  CREATE TABLE cleaned_2021_new AS
+                  SELECT
+                    Date UTC,
+                    CleanedValue AS Value
+                  FROM cleaned_2021;
+                  
+                  DROP TABLE cleaned_2021;
+                  
+                  ALTER TABLE cleaned_2021_new RENAME TO cleaned_2021;
+
+                ELSE
+                  NULL
+              END AS CleanedValue
+            FROM RawNL21;
+            
+            Create table rawNL22 as 
+            SELECT DATEUTC, Value
+            FROM monthly_hourly_load_values_2021
+            WHERE CountryCode = 'NL' AND Value IS NOT NULL;
+           
+            Create Table cleaned_2022 as 
+            
+            SELECT
+              DateUTC,
+              Value,
+              CASE
+                -- Waarden met exact 1 punt → correcte MW-waarden met decimalen
+                WHEN LENGTH(Value) - LENGTH(REPLACE(Value, '.', '')) = 1 THEN
+                  CAST(Value AS REAL)
+            
+                -- Waarden zonder punt, maar volledig numeriek → hele MW-waarden
+                WHEN LENGTH(Value) - LENGTH(REPLACE(Value, '.', '')) = 0
+                     AND Value GLOB '[0-9]*' THEN
+                  CAST(Value AS REAL)
+            
+                -- Foutief genoteerde waarden tussen 90 en 200 miljoen (honderden watt) → delen door 1000
+                WHEN CAST(REPLACE(Value, '.', '') AS INTEGER) BETWEEN 90000000 AND 200000000 THEN
+                  CAST(REPLACE(Value, '.', '') AS REAL) / 10000.0
+            
+                -- Foutief genoteerde waarden tussen 9 en 20 miljoen (duizenden watt) → delen door 100
+                WHEN CAST(REPLACE(Value, '.', '') AS INTEGER) BETWEEN 9000000 AND 20000000 THEN
+                  CAST(REPLACE(Value, '.', '') AS REAL) / 1000.0
+            
+                ELSE
+                  NULL
+              END AS CleanedValue
+            FROM RawNL22;
+
+            CREATE TABLE cleaned_2022_new AS
+            SELECT
+              DateUTC,
+              CleanedValue AS Value
+            FROM cleaned_2022;
+            
+          
+            DROP TABLE cleaned_2022;
+            
+        
+            ALTER TABLE cleaned_2022_new RENAME TO cleaned_2022;
+            
+            CREATE TABLE cleaned_2023 AS
+            SELECT DateUTC, Value
+            FROM monthly_hourly_load_values_2023
+            WHERE CountryCode = 'NL' AND Value IS NOT NULL;
+            
+            CREATE TABLE cleaned_2024 AS
+            SELECT DateUTC, Value
+            FROM monthly_hourly_load_values_2024
+            WHERE CountryCode = 'NL' AND Value IS NOT NULL;
 
 
 --creating new table combining the cleaned tables per year
+
 CREATE TABLE electricity_nl_clean AS
 SELECT * FROM cleaned_2020
+UNION ALL
+SELECT * FROM cleaned_2021
+UNION ALL
+SELECT * FROM cleaned_2022
 UNION ALL
 SELECT * FROM cleaned_2023
 UNION ALL
