@@ -1,7 +1,8 @@
 # Energy Demand Forecast NL
 
 Forecasting electricity demand in the Netherlands using Python, SQL and ML
-Using data from ENTSO-E regarding hourly electricity demand from 2020 until 2024, I create a forecasting model for future electricity demand. *
+Using data from ENTSO-E regarding hourly electricity demand from 2020 until 2024, I create a forecasting model for future electricity demand. 
+Data can be found via the following link [Energy Demand data](https://www.entsoe.eu/data/power-stats/)
 
 Files containing Queries and Python Scripts for SQL and Google Colab respectively can be found in the files above.
 
